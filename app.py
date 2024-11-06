@@ -160,12 +160,22 @@ def signup():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        
+        # Check if the user already exists
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('Username already exists. Please log in instead.')
+            return redirect(url_for('login'))
+        
+        # Create new user if username is unique
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-        flash('Account created successfully!')
+        
+        flash('Account created successfully! Please log in.')
         return redirect(url_for('login'))
+    
     return render_template('signup.html')
 
 @app.route('/logout')
@@ -192,16 +202,24 @@ def stock_details(symbol):
 
 # Helper function (unchanged)
 def get_top_50_stocks():
-    top_50_stocks = ['AAPL', 'GOOGL', 'AMZN', 'MSFT', 'TSLA', 'META', 'NVDA', 'JPM', 'V', 'JNJ', 'WMT', 
-          'PG', 'MA', 'DIS', 'NFLX', 'HD', 'PFE', 'KO', 'PEP', 'MRK',         'XOM', 'BAC', 'CVX', 'NKE', 'CSCO', 'ABT', 'TMO', 'LLY', 'ORCL', 'UNH',
-        'BABA', 'CRM', 'COST', 'QCOM', 'INTC', 'MDT', 'MCD', 'TMUS', 'UPS', 'HON',
-        'IBM', 'AMD', 'DHR', 'TXN', 'NEE', 'SPGI', 'SBUX', 'BLK', 'GS', 'LOW']  # Same stock symbols as before
+    top_50_stocks = [
+        'AAPL', 'GOOGL', 'AMZN', 'MSFT', 'TSLA', 'META', 'NVDA', 'JPM', 'V', 'JNJ',
+        'WMT', 'PG', 'MA', 'DIS', 'NFLX', 'HD', 'PFE', 'KO', 'PEP', 'MRK', 'XOM',
+        'BAC', 'CVX', 'NKE', 'CSCO', 'ABT', 'TMO', 'LLY', 'ORCL', 'UNH', 'BABA',
+        'CRM', 'COST', 'QCOM', 'INTC', 'MDT', 'MCD', 'TMUS', 'UPS', 'HON',
+        'IBM', 'AMD', 'DHR', 'TXN', 'NEE', 'SPGI', 'SBUX', 'BLK', 'GS', 'LOW'
+    ]
     stock_data = []
 
     for symbol in top_50_stocks:
-        # stock = YieldFrom.Ticker(symbol)
         stock = yf.Ticker(symbol)
         info = stock.info
+        
+        # Log the symbol and info for debugging
+        if info is None:
+            print(f"Warning: No info found for {symbol}. Skipping.")
+            continue
+
         hist = stock.history(period="1d")
         current_price = hist['Close'].iloc[0] if not hist.empty else None
 
@@ -214,7 +232,6 @@ def get_top_50_stocks():
             'dividend_yield': info.get('dividendYield', 'N/A')
         })
     return stock_data
-
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
 

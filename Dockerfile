@@ -1,12 +1,15 @@
-# File: Dockerfile
+# Use a lightweight base image
 FROM python:3.9-slim
 
+# Set working directory
 WORKDIR /app
 
-COPY . /app
+# Copy and install dependencies in one step to leverage Docker cache
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install -r requirements.txt
+# Copy the rest of the application
+COPY . .
 
-EXPOSE 5000
-
+# Run the application
 CMD ["python", "app.py"]
