@@ -1,0 +1,58 @@
+name: CI/CD Pipeline
+
+# Trigger the workflow on push to main or on pull request
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Job to set up and run tests
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'  # specify Python version if needed
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        run: |
+          python -m unittest discover  # Modify this if using a different test framework
+
+  # Job to deploy the application
+  deploy:
+    needs: build-and-test  # Runs deploy only if the test job succeeds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set Up SSH Key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "54.145.234.228" >> ~/.ssh/known_hosts
+
+      - name: Deploy Application
+        run: |
+          ssh -i ~/.ssh/id_rsa ec2-user@54.145.234.228 <<EOF
+            sudo systemctl stop stockapp.service
+            # Copy files to the server or pull latest from GitHub
+            # git pull origin main (if you have Git on your server)
+            sudo systemctl start stockapp.service
+          EOF
