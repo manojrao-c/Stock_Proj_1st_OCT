@@ -18,17 +18,17 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # Specify Python version if needed
+          python-version: '3.11'  # Switch to Python 3.11 for compatibility
 
       - name: Install Dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install setuptools wheel
+          python -m pip install --upgrade pip
+          python -m pip install setuptools==65.5.0 wheel  # Use a compatible version of setuptools
           pip install -r requirements.txt
 
       - name: Run Tests
         run: |
-          python3 -m unittest discover  # Modify this if using a different test framework
+          python -m unittest discover  # Modify this if using a different test framework
 
   # Job to deploy the application
   deploy:
@@ -44,16 +44,15 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | base64 -d > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 54.145.234.228 >> ~/.ssh/known_hosts
+          ssh-keyscan -H "54.145.234.228" >> ~/.ssh/known_hosts
 
       - name: Deploy Application
         run: |
-          scp -i ~/.ssh/id_rsa -r . ec2-user@54.145.234.228:/home/ec2-user/Stock_Proj_1st_OCT
           ssh -i ~/.ssh/id_rsa ec2-user@54.145.234.228 <<EOF
-            sudo systemctl stop stockapp.service
-            # Navigate to application directory if needed
-            # Pull latest changes or copy new files
-            sudo systemctl start stockapp.service
+            cd /home/ec2-user/Stock_Proj_1st_OCT
+            source venv/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart stockapp.service
           EOF
