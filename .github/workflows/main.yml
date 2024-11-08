@@ -1,6 +1,5 @@
 name: CI/CD Pipeline
 
-# Trigger the workflow on push to main or on pull request
 on:
   push:
     branches: [main]
@@ -19,7 +18,7 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # specify Python version if needed
+          python-version: '3.x'  # Specify Python version if needed
 
       - name: Install Dependencies
         run: |
@@ -44,15 +43,16 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | base64 -d > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "54.145.234.228" >> ~/.ssh/known_hosts
+          ssh-keyscan -H 54.145.234.228 >> ~/.ssh/known_hosts
 
       - name: Deploy Application
         run: |
+          scp -i ~/.ssh/id_rsa -r . ec2-user@54.145.234.228:/home/ec2-user/your_app_directory
           ssh -i ~/.ssh/id_rsa ec2-user@54.145.234.228 <<EOF
             sudo systemctl stop stockapp.service
-            # Copy files to the server or pull latest from GitHub
-            # git pull origin main (if you have Git on your server)
+            # Navigate to application directory if needed
+            # Pull latest changes or copy new files
             sudo systemctl start stockapp.service
           EOF
