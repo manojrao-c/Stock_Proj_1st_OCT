@@ -44,7 +44,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa  # Remove Windows-style CRLF line endings
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "54.145.234.228" >> ~/.ssh/known_hosts
           eval "$(ssh-agent -s)"
