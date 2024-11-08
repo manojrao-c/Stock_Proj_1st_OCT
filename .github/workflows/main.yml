@@ -47,10 +47,12 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "54.145.234.228" >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa  # Add the key to the SSH agent
 
       - name: Deploy Application
         run: |
-          ssh -i ~/.ssh/id_rsa ec2-user@54.145.234.228 <<EOF
+          ssh -o StrictHostKeyChecking=no ec2-user@54.145.234.228 << 'EOF'
             cd /home/ec2-user/Stock_Proj_1st_OCT
             source venv/bin/activate
             pip install -r requirements.txt
