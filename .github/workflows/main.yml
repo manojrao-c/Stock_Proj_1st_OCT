@@ -44,11 +44,11 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa  # Remove Windows-style CRLF line endings
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | sed 's/\\n/\n/g' > ~/.ssh/id_rsa  # Clean up line endings
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "54.145.234.228" >> ~/.ssh/known_hosts
           eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa  # Add the key to the SSH agent
+          ssh-add ~/.ssh/id_rsa
 
       - name: Deploy Application
         run: |
