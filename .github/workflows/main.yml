@@ -1,0 +1,67 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Job to set up and run tests
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools==65.5.0 wheel
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        run: |
+          python -m unittest discover
+
+  # Job to deploy the application
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set Up SSH Key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" | sed 's/\\n/\n/g' > ~/.ssh/id_rsa  # Clean up line endings
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Validate SSH key format
+          if ! ssh-keygen -y -f ~/.ssh/id_rsa &>/dev/null; then
+            echo "Invalid SSH key format"
+            exit 1
+          fi
+          
+          ssh-keyscan -H "54.145.234.228" >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
+      - name: Deploy Application
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@54.145.234.228 << 'EOF'
+            cd /home/ec2-user/Stock_Proj_1st_OCT
+            source venv/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart stockapp.service
+          EOF
