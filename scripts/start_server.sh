@@ -1,6 +1,6 @@
 #!/bin/bash
 # Navigate to app directory
-cd /home/ec2-user/flask-app
+cd /home/ec2-user/Stock_Proj_1st_OCT
 
 # Activate virtual environment
 source venv/bin/activate
