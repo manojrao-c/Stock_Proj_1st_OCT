@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+
+# Virtual Environment
+stockapp/
+env/
+ENV/
+.venv/
+.venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Data files
+data/
+*.csv
+*.xlsx
+
+# Compiled files
+*.o
+*.so
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Other
+*.sqlite3
+*.db

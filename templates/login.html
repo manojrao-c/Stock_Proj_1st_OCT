@@ -72,10 +72,20 @@
         <div class="card shadow-lg mx-auto" style="max-width: 400px;">
             <div class="card-body">
                 <h2 class="text-center">Login</h2>
+
+                <!-- Flash Message Section -->
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="alert alert-danger">
+                            {{ messages[0] }}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
                 <form method="POST">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" name="username" required>
+                        <input type="text" class="form-control" name="username" value="{{ username }}" required>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>

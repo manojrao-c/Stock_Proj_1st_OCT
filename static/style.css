@@ -133,6 +133,26 @@ h1, h2, h3, .navbar-brand {
     color: #0056b3; /* Darker blue on hover */
 }
 
+/* Change the background color of the dropdown menu */
+.btn-secondary {
+    background-color: #0d6efd; /* Set to your desired color */
+}
+
+.btn-secondary:hover {
+    background-color: #0056b3; /* Set to your desired color */
+}
+
+/* Change the text color of dropdown items */
+.dropdown-item {
+    color: #0d6efd; /* Set to your desired text color */
+}
+
+/* Change the hover color of dropdown items */
+.dropdown-item:hover {
+    background-color: #f8f9faa2; /* Set to your desired hover color */
+    color: #0056b3; /* Set to your desired hover text color */
+}
+
 /* Card styling */
 .card {
     background-color: #ffffff;
